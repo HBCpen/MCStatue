@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+bin/
+lib/
+include/
+lib64/
+pyvenv.cfg
+.venv/
+env/
+
+# Project Artifacts
+*.litematic
+block_palette.json
+
+# OS
+.DS_Store
+Thumbs.db

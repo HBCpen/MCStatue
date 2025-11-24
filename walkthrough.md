@@ -11,7 +11,12 @@ pip install litemapy Pillow
 
 ## Usage
 
-Run the conversion script with the path to your skin file:
+First, fetch the block palette:
+```bash
+python fetch_palette.py
+```
+
+Then, run the conversion script with the path to your skin file:
 
 ```bash
 python skin_to_litematic.py <path_to_skin.png> [output_filename.litematic]

@@ -3,65 +3,28 @@ import math
 from PIL import Image
 import litemapy
 
-# Block Palette (Simplified for now, can be expanded)
-# Format: (R, G, B): "minecraft:block_id"
-BLOCK_PALETTE = {
-    (221, 221, 221): "minecraft:white_wool",
-    (219, 125, 62): "minecraft:orange_wool",
-    (179, 80, 188): "minecraft:magenta_wool",
-    (107, 138, 201): "minecraft:light_blue_wool",
-    (177, 166, 39): "minecraft:yellow_wool",
-    (65, 174, 56): "minecraft:lime_wool",
-    (208, 132, 153): "minecraft:pink_wool",
-    (64, 64, 64): "minecraft:gray_wool",
-    (154, 161, 161): "minecraft:light_gray_wool",
-    (46, 110, 137): "minecraft:cyan_wool",
-    (126, 61, 181): "minecraft:purple_wool",
-    (46, 56, 141): "minecraft:blue_wool",
-    (79, 50, 31): "minecraft:brown_wool",
-    (53, 70, 27): "minecraft:green_wool",
-    (150, 52, 48): "minecraft:red_wool",
-    (25, 22, 22): "minecraft:black_wool",
-    
-    # Concrete
-    (207, 213, 214): "minecraft:white_concrete",
-    (224, 97, 0): "minecraft:orange_concrete",
-    (169, 48, 159): "minecraft:magenta_concrete",
-    (35, 137, 198): "minecraft:light_blue_concrete",
-    (240, 175, 21): "minecraft:yellow_concrete",
-    (94, 169, 24): "minecraft:lime_concrete",
-    (213, 101, 142): "minecraft:pink_concrete",
-    (54, 57, 61): "minecraft:gray_concrete",
-    (125, 125, 115): "minecraft:light_gray_concrete",
-    (21, 119, 136): "minecraft:cyan_concrete",
-    (100, 31, 156): "minecraft:purple_concrete",
-    (44, 46, 143): "minecraft:blue_concrete",
-    (96, 59, 31): "minecraft:brown_concrete",
-    (73, 91, 36): "minecraft:green_concrete",
-    (142, 32, 32): "minecraft:red_concrete",
-    (8, 10, 15): "minecraft:black_concrete",
+import json
+import os
 
-    # Terracotta
-    (209, 177, 161): "minecraft:white_terracotta",
-    (160, 83, 37): "minecraft:orange_terracotta",
-    (149, 87, 108): "minecraft:magenta_terracotta",
-    (112, 108, 138): "minecraft:light_blue_terracotta",
-    (186, 133, 35): "minecraft:yellow_terracotta",
-    (103, 117, 52): "minecraft:lime_terracotta",
-    (160, 77, 78): "minecraft:pink_terracotta",
-    (57, 41, 35): "minecraft:gray_terracotta",
-    (135, 107, 98): "minecraft:light_gray_terracotta",
-    (86, 91, 91): "minecraft:cyan_terracotta",
-    (118, 69, 86): "minecraft:purple_terracotta",
-    (74, 59, 91): "minecraft:blue_terracotta",
-    (77, 51, 35): "minecraft:brown_terracotta",
-    (76, 83, 42): "minecraft:green_terracotta",
-    (142, 60, 46): "minecraft:red_terracotta",
-    (37, 22, 16): "minecraft:black_terracotta",
-    
-    # Skin tones (Terracotta is good for this)
-    (152, 94, 67): "minecraft:terracotta", # Regular terracotta
-}
+# Load Block Palette from JSON
+PALETTE_FILE = "block_palette.json"
+
+def get_block_palette():
+    if not os.path.exists(PALETTE_FILE):
+        print(f"Error: {PALETTE_FILE} not found. Please run fetch_palette.py first.")
+        sys.exit(1)
+        
+    with open(PALETTE_FILE, 'r') as f:
+        data = json.load(f)
+        
+    palette = {}
+    for rgb_str, block_id in data.items():
+        r, g, b = map(int, rgb_str.split(','))
+        palette[(r, g, b)] = block_id
+        
+    return palette
+
+BLOCK_PALETTE = {} # Will be loaded in main
 
 def load_skin(path):
     try:
@@ -126,7 +89,7 @@ def build_statue_data(skin_image):
     
     parts = [
         # Head (8x8x8) - Top
-        {"w": 8, "h": 8, "d": 8, "u": 0, "v": 0, "x": 4, "y": 24, "z": 4, "overlay_u": 32, "overlay_v": 0},
+        {"w": 8, "h": 8, "d": 8, "u": 0, "v": 0, "x": 4, "y": 24, "z": 2, "overlay_u": 32, "overlay_v": 0},
         # Body (8x12x4) - Center
         {"w": 8, "h": 12, "d": 4, "u": 16, "v": 16, "x": 4, "y": 12, "z": 4, "overlay_u": 16, "overlay_v": 32},
         # Right Arm (4x12x4) - Left side of statue
@@ -186,7 +149,7 @@ def build_statue_data(skin_image):
             # Top (y=h-1)
             ("top", d, 0, w, d, lambda u, v: (u, h - 1, d - 1 - v)),
             # Bottom (y=0)
-            ("bottom", d + w, 0, w, d, lambda u, v: (u, 0, d - 1 - v)),
+            ("bottom", d + w, 0, w, d, lambda u, v: (w - 1 - u, 0, v)),
             # Right (x=w-1)
             ("right", d + w, d, d, h, lambda u, v: (w - 1, h - 1 - v, d - 1 - u)), # This is actually Left face in texture layout usually?
             # Let's re-verify texture layout.
@@ -329,6 +292,10 @@ if __name__ == "__main__":
     
     print(f"Loading skin from {skin_path}...")
     img = load_skin(skin_path)
+    
+    print("Loading block palette...")
+    BLOCK_PALETTE = get_block_palette()
+    print(f"Loaded {len(BLOCK_PALETTE)} blocks in palette.")
     
     print("Building statue data...")
     data = build_statue_data(img)
