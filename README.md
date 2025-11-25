@@ -54,5 +54,29 @@ You can verify the contents of a generated schematic using the included verifica
 python verify_litematic.py <file.litematic>
 ```
 
+## Web Interface
+
+The project includes a modern web interface with a 3D preview.
+
+### Prerequisites
+- Node.js and npm
+
+### Running the Web App
+
+1. **Start the Backend**:
+   ```bash
+   cd backend
+   uvicorn main:app --reload
+   ```
+
+2. **Start the Frontend**:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+3. Open your browser to the URL shown in the frontend terminal (usually `http://localhost:5173`).
+
 ## License
 [MIT License](LICENSE)
